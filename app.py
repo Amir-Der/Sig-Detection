@@ -1,11 +1,17 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Signature
 from import_cv2 import preprocess_image, extract_hog_feature
 from train import train_user_model, predict_signature
-import os, uuid, joblib
+import os, uuid, joblib, subprocess
+from dotenv import load_dotenv
+
+# بارگذاری متغیرهای محیطی
+load_dotenv()
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
+GITHUB_REPO = os.getenv("GITHUB_REPO")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key'
@@ -23,6 +29,21 @@ with app.app_context():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+def save_model_to_github(user_id, model, scaler, pca):
+    try:
+        os.makedirs("usermodels", exist_ok=True)
+        path = f"usermodels/{user_id}.pkl"
+        joblib.dump((model, scaler, pca), path)
+
+        subprocess.run(["git", "add", path], check=True)
+        subprocess.run(["git", "commit", "-m", f"Add model for user {user_id}"], check=True)
+        subprocess.run(["git", "push", f"https://{GITHUB_TOKEN}@{GITHUB_REPO.split('https://')[1]}"], check=True)
+
+        print(f"Model for user {user_id} pushed to GitHub.")
+    except Exception as e:
+        print("GitHub save failed:", e)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -83,14 +104,12 @@ def upload_signature(sig_type):
     if files and sig_type in ["real", "fake"]:
         folder = os.path.join(app.config["UPLOAD_FOLDER"], str(current_user.id), sig_type)
         os.makedirs(folder, exist_ok=True)
-
         for file in files:
             filename = str(uuid.uuid4()) + ".png"
             path = os.path.join(folder, filename)
             file.save(path)
             sig = Signature(filename=filename, type=sig_type, user_id=current_user.id)
             db.session.add(sig)
-
         db.session.commit()
         return "OK"
     return "Failed"
@@ -104,5 +123,10 @@ def train():
         user = User.query.get(current_user.id)
         user.has_model = True
         db.session.commit()
+        try:
+            model, scaler, pca = joblib.load(model_path)
+            save_model_to_github(current_user.id, model, scaler, pca)
+        except:
+            pass
         return jsonify({"status": "done"})
     return jsonify({"status": "fail"})
