@@ -2,63 +2,87 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>داشبورد کاربر</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سامانه تشخیص امضای جعلی</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>بررسی امضا</h1>
+  <header class="site-header">
+    <h1>سامانه هوشمند تشخیص امضای جعلی</h1>
+    <p>با دقت ۹۹.۵٪ مبتنی بر یادگیری ماشین - ثبت امضا و دریافت نتیجه آنی</p>
+  </header>
 
-    <form method="POST" enctype="multipart/form-data">
-      <input type="file" name="file" required accept="image/*">
-      <button type="submit">بررسی امضا</button>
-    </form>
+  <div class="card">
+    <div class="tab-buttons">
+      <button class="tab active" onclick="switchTab('test')">بررسی امضا</button>
+      <button class="tab" onclick="switchTab('train')">آموزش مدل من</button>
+    </div>
 
-    {% if result %}
-    <div class="result">{{ result }}</div>
-    {% endif %}
+    <div class="tab-content" id="test">
+      <form method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" required accept="image/*">
+        <button type="submit">بررسی امضا</button>
+      </form>
+      {% if result %}
+      <div class="result">{{ result }}</div>
+      {% endif %}
+    </div>
 
-    <hr>
+    <div class="tab-content hidden" id="train">
+      <form id="upload-real" enctype="multipart/form-data">
+        <label>آپلود امضاهای معتبر</label>
+        <input type="file" name="files" multiple required accept="image/*">
+        <button type="submit">بارگذاری</button>
+      </form>
 
-    <h2>آپلود امضا برای آموزش مدل</h2>
+      <form id="upload-fake" enctype="multipart/form-data">
+        <label>آپلود امضاهای جعلی</label>
+        <input type="file" name="files" multiple required accept="image/*">
+        <button type="submit">بارگذاری</button>
+      </form>
 
-    <form id="upload-real" enctype="multipart/form-data">
-      <input type="file" name="files" accept="image/*" multiple required>
-      <button type="submit">آپلود امضاهای معتبر</button>
-    </form>
-
-    <form id="upload-fake" enctype="multipart/form-data">
-      <input type="file" name="files" accept="image/*" multiple required>
-      <button type="submit">آپلود امضاهای جعلی</button>
-    </form>
-
-    <button onclick="trainModel()">آموزش مدل من</button>
-    <p id="train-status"></p>
-
-    <hr>
-    <a href="/logout">خروج</a>
+      <button onclick="trainModel()">آموزش مدل</button>
+      <p id="train-status"></p>
+    </div>
   </div>
 
+  <footer class="site-footer">
+    <div class="footer-section">
+      <h4>درباره پروژه</h4>
+      <p>پروژه دانشجویی با هدف شناسایی امضای جعلی با استفاده از SVM و ویژگی‌های HOG</p>
+    </div>
+    <div class="footer-section">
+      <h4>تیم ما</h4>
+      <p>امیرمحمد درخشان، محمد بهرامگیری</p>
+    </div>
+    <div class="footer-section">
+      <h4>ارتباط با ما</h4>
+      <p><a href="https://github.com/Amir-Der/Sig-Detection" target="_blank">گیت‌هاب پروژه</a></p>
+    </div>
+  </footer>
+
   <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.getElementById(tab).classList.remove('hidden');
+      event.target.classList.add('active');
+    }
+
     function upload(type, formId) {
       const form = document.getElementById(formId);
-      const input = form.querySelector('input[type="file"]');
+      const input = form.querySelector('input');
       const data = new FormData();
-      for (const file of input.files) {
-        data.append("files", file);
-      }
-      fetch(`/upload/${type}`, { method: 'POST', body: data })
-        .then(() => alert("آپلود انجام شد"));
+      for (const file of input.files) data.append("files", file);
+      fetch(`/upload/${type}`, { method: 'POST', body: data }).then(() => alert("آپلود انجام شد"));
     }
 
     document.getElementById("upload-real").addEventListener("submit", e => {
-      e.preventDefault();
-      upload("real", "upload-real");
+      e.preventDefault(); upload("real", "upload-real");
     });
 
     document.getElementById("upload-fake").addEventListener("submit", e => {
-      e.preventDefault();
-      upload("fake", "upload-fake");
+      e.preventDefault(); upload("fake", "upload-fake");
     });
 
     function trainModel() {
@@ -66,7 +90,7 @@
         .then(res => res.json())
         .then(data => {
           document.getElementById("train-status").innerText =
-            data.status === "done" ? "✅ مدل شما با موفقیت آموزش دید!" : "❌ آموزش مدل انجام نشد";
+            data.status === "done" ? "✅ مدل آموزش دید" : "❌ آموزش شکست خورد";
         });
     }
   </script>
