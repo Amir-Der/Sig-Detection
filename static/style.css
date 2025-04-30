@@ -1,3 +1,5 @@
+/* style.css نسخه نهایی برای رابط مدرن */
+
 @font-face {
   font-family: 'IRANSans';
   src: url('/static/fonts/IRANSansWeb.woff2') format('woff2'),
@@ -8,17 +10,147 @@
 
 body {
   margin: 0;
+  padding: 0;
   font-family: 'IRANSans', sans-serif;
-  background: 
-    linear-gradient(135deg, rgba(35, 213, 171, 0.3), rgba(35, 166, 213, 0.3)),
-    #ffffff;
+  background: linear-gradient(135deg, rgba(35,213,171,0.25), rgba(35,166,213,0.25)), #ffffff;
   background-blend-mode: overlay;
-  background-repeat: no-repeat;
-  background-size: cover;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #222;
+}
+
+.site-header {
+  text-align: center;
+  padding: 40px 20px 10px;
+}
+
+.site-header h1 {
+  font-size: 2.4rem;
+  margin-bottom: 10px;
+}
+
+.site-header p {
+  font-size: 1.1rem;
+  color: #444;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  margin: 20px 0;
+}
+
+.tab-buttons {
+  display: flex;
+  justify-content: start;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(0,0,0,0.05);
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.tab.active {
+  background: #23a6d5;
+  color: #fff;
+}
+
+.tab:hover:not(.active) {
+  background: rgba(0,0,0,0.1);
+}
+
+.tab-content {
+  display: block;
+}
+
+.tab-content.hidden {
+  display: none;
+}
+
+input[type="file"], button {
+  width: 100%;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  font-family: 'IRANSans', sans-serif;
+}
+
+button {
+  background: #23a6d5;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #1c8eb4;
+}
+
+.result {
+  margin-top: 10px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #222;
+}
+
+.site-footer {
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  padding: 20px;
-  color: #222;
+  flex-wrap: wrap;
+  gap: 40px;
+  padding: 30px 20px;
+  background: #f7f7f7;
+  border-top: 1px solid #ccc;
+  margin-top: auto;
+  text-align: center;
+  width: 100%;
+}
+
+.footer-section h4 {
+  margin-bottom: 8px;
+  font-size: 1.1rem;
+}
+
+.footer-section p, .footer-section a {
+  font-size: 0.95rem;
+  color: #444;
+  text-decoration: none;
+}
+
+.footer-section a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .card {
+    padding: 20px;
+  }
+  .site-header h1 {
+    font-size: 1.8rem;
+  }
+  .tab-buttons {
+    flex-direction: column;
+    align-items: start;
+  }
+  .tab {
+    width: 100%;
+  }
 }
