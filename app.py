@@ -4,11 +4,11 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Signature
 from import_cv2 import preprocess_image, extract_hog_feature
-from train import train_user_model, predict_signature
+from train import train_user_model, predict_signature_with_conf
 import os, uuid, joblib, subprocess
 from dotenv import load_dotenv
 
-# بارگذاری متغیرهای محیطی
+# بارگذاری متغیرهای محیطی (توکن GitHub و URL ریپو)
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")
@@ -37,11 +37,12 @@ def save_model_to_github(user_id, model, scaler, pca):
         path = f"usermodels/{user_id}.pkl"
         joblib.dump((model, scaler, pca), path)
 
+        # خودکار اضافه و کامیت و پوش به GitHub
         subprocess.run(["git", "add", path], check=True)
         subprocess.run(["git", "commit", "-m", f"Add model for user {user_id}"], check=True)
-        subprocess.run(["git", "push", f"https://{GITHUB_TOKEN}@{GITHUB_REPO.split('https://')[1]}"], check=True)
-
-        print(f"Model for user {user_id} pushed to GitHub.")
+        # حذف https:// اول آدرس برای پست شدن
+        repo = GITHUB_REPO.replace("https://", "")
+        subprocess.run(["git", "push", f"https://{GITHUB_TOKEN}@{repo}"], check=True)
     except Exception as e:
         print("GitHub save failed:", e)
 
@@ -50,11 +51,11 @@ def save_model_to_github(user_id, model, scaler, pca):
 def register():
     if request.method == "POST":
         username = request.form["username"]
-        password = generate_password_hash(request.form["password"])
+        pwd = generate_password_hash(request.form["password"])
         if User.query.filter_by(username=username).first():
             flash("کاربری با این نام وجود دارد")
             return redirect(url_for("register"))
-        user = User(username=username, password=password)
+        user = User(username=username, password=pwd)
         db.session.add(user)
         db.session.commit()
         login_user(user, remember=True)
@@ -83,18 +84,21 @@ def logout():
 @app.route("/", methods=["GET", "POST"])
 @login_required
 def dashboard():
-    result = None
     if request.method == "POST":
-        file = request.files["file"]
-        if file:
-            filename = str(uuid.uuid4()) + ".png"
-            folder = os.path.join(app.config["UPLOAD_FOLDER"], str(current_user.id))
-            os.makedirs(folder, exist_ok=True)
-            filepath = os.path.join(folder, filename)
-            file.save(filepath)
-            result = predict_signature(current_user.id, filepath)
-            os.remove(filepath)
-    return render_template("dashboard.html", result=result)
+        file = request.files.get("file")
+        if not file:
+            return jsonify(result="فایلی ارسال نشده", confidence=0)
+        # ذخیره موقت
+        filename = str(uuid.uuid4()) + ".png"
+        folder = os.path.join(app.config["UPLOAD_FOLDER"], str(current_user.id))
+        os.makedirs(folder, exist_ok=True)
+        filepath = os.path.join(folder, filename)
+        file.save(filepath)
+        # پیش‌بینی با confidence
+        result, confidence = predict_signature_with_conf(current_user.id, filepath)
+        os.remove(filepath)
+        return jsonify(result=result, confidence=confidence)
+    return render_template("dashboard.html")
 
 
 @app.route("/upload/<sig_type>", methods=["POST"])
@@ -105,10 +109,10 @@ def upload_signature(sig_type):
         folder = os.path.join(app.config["UPLOAD_FOLDER"], str(current_user.id), sig_type)
         os.makedirs(folder, exist_ok=True)
         for file in files:
-            filename = str(uuid.uuid4()) + ".png"
-            path = os.path.join(folder, filename)
+            fn = str(uuid.uuid4()) + ".png"
+            path = os.path.join(folder, fn)
             file.save(path)
-            sig = Signature(filename=filename, type=sig_type, user_id=current_user.id)
+            sig = Signature(filename=fn, type=sig_type, user_id=current_user.id)
             db.session.add(sig)
         db.session.commit()
         return "OK"
@@ -120,13 +124,16 @@ def upload_signature(sig_type):
 def train():
     model_path = train_user_model(current_user.id)
     if model_path:
+        # ذخیره مدل روی GitHub
+        model, scaler, pca = joblib.load(model_path)
+        save_model_to_github(current_user.id, model, scaler, pca)
+        # علامت‌گذاری کاربر
         user = User.query.get(current_user.id)
         user.has_model = True
         db.session.commit()
-        try:
-            model, scaler, pca = joblib.load(model_path)
-            save_model_to_github(current_user.id, model, scaler, pca)
-        except:
-            pass
-        return jsonify({"status": "done"})
-    return jsonify({"status": "fail"})
+        return jsonify(status="done")
+    return jsonify(status="fail")
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
