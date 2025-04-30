@@ -11,6 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['REMEMBER_COOKIE_DURATION'] = 3600 * 24 * 7  # 7 روز ماندگاری ورود
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -23,36 +24,47 @@ with app.app_context():
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
         password = generate_password_hash(request.form["password"])
+
         if User.query.filter_by(username=username).first():
             flash("کاربری با این نام وجود دارد")
             return redirect(url_for("register"))
+
         user = User(username=username, password=password)
         db.session.add(user)
         db.session.commit()
-        flash("ثبت‌نام با موفقیت انجام شد")
-        return redirect(url_for("login"))
+
+        login_user(user, remember=True)
+        return redirect(url_for("dashboard"))
+
     return render_template("register.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
         user = User.query.filter_by(username=request.form["username"]).first()
+
         if user and check_password_hash(user.password, request.form["password"]):
-            login_user(user)
+            login_user(user, remember=True)
             return redirect(url_for("dashboard"))
+
         flash("اطلاعات ورود اشتباه است")
+
     return render_template("login.html")
+
 
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
+
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
@@ -70,6 +82,7 @@ def dashboard():
             os.remove(filepath)
     return render_template("dashboard.html", result=result)
 
+
 @app.route("/upload/<sig_type>", methods=["POST"])
 @login_required
 def upload_signature(sig_type):
@@ -84,6 +97,7 @@ def upload_signature(sig_type):
         db.session.commit()
         return "OK"
     return "Failed"
+
 
 @app.route("/train", methods=["POST"])
 @login_required
