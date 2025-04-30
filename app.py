@@ -97,7 +97,7 @@ def dashboard():
         # پیش‌بینی با confidence
         result, confidence = predict_signature_with_conf(current_user.id, filepath)
         os.remove(filepath)
-        return jsonify(result=result, confidence=confidence)
+        return jsonify(result=result)
     return render_template("dashboard.html")
 
 
