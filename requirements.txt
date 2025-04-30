@@ -6,3 +6,4 @@ scikit-image
 opencv-python
 joblib
 gunicorn
+python-dotenv
