@@ -1,0 +1,8 @@
+flask
+flask-login
+flask-sqlalchemy
+scikit-learn
+scikit-image
+opencv-python
+joblib
+gunicorn

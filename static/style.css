@@ -1,0 +1,89 @@
+@font-face {
+     font-family: 'IRANSans';
+     src: url('/static/fonts/IRANSansWeb.woff2') format('woff2'),
+          url('/static/fonts/IRANSansWeb.woff') format('woff');
+     font-weight: normal;
+     font-style: normal;
+   }
+   
+   body {
+     margin: 0;
+     font-family: 'IRANSans', sans-serif;
+     background: linear-gradient(-45deg, #23a6d5, #23d5ab, #ee7752, #e73c7e);
+     background-size: 400% 400%;
+     animation: gradientBG 15s ease infinite;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     min-height: 100vh;
+     padding: 20px;
+     color: #222;
+   }
+   
+   @keyframes gradientBG {
+     0% { background-position: 0% 50%; }
+     50% { background-position: 100% 50%; }
+     100% { background-position: 0% 50%; }
+   }
+   
+   .container {
+     background: rgba(255, 255, 255, 0.2);
+     backdrop-filter: blur(20px);
+     padding: 40px 30px;
+     border-radius: 20px;
+     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+     width: 100%;
+     max-width: 500px;
+     text-align: center;
+     border: 1px solid rgba(255, 255, 255, 0.3);
+   }
+   
+   h1, h2 {
+     margin-bottom: 20px;
+     font-weight: bold;
+   }
+   
+   input[type="file"], button {
+     display: block;
+     width: 100%;
+     padding: 12px;
+     margin: 10px 0;
+     border: none;
+     border-radius: 10px;
+     font-size: 1rem;
+     font-family: 'IRANSans', sans-serif;
+   }
+   
+   input[type="file"] {
+     background-color: rgba(255, 255, 255, 0.8);
+   }
+   
+   button {
+     background-color: #3f51b5;
+     color: white;
+     font-weight: bold;
+     cursor: pointer;
+     transition: background 0.3s ease;
+   }
+   
+   button:hover {
+     background-color: #5c6bc0;
+   }
+   
+   .result {
+     margin-top: 20px;
+     font-size: 1.2rem;
+     font-weight: bold;
+   }
+   
+   a {
+     color: #007bff;
+     text-decoration: none;
+     display: inline-block;
+     margin-top: 15px;
+   }
+   
+   a:hover {
+     text-decoration: underline;
+   }
+   

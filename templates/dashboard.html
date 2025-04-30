@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>داشبورد کاربر</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>بررسی امضا</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+      <input type="file" name="file" required accept="image/*">
+      <button type="submit">بررسی امضا</button>
+    </form>
+
+    {% if result %}
+    <div class="result">{{ result }}</div>
+    {% endif %}
+
+    <hr>
+
+    <h2>آپلود امضا برای آموزش مدل</h2>
+
+    <form id="upload-real" enctype="multipart/form-data">
+      <input type="file" name="file" required>
+      <button type="submit">آپلود امضای معتبر</button>
+    </form>
+
+    <form id="upload-fake" enctype="multipart/form-data">
+      <input type="file" name="file" required>
+      <button type="submit">آپلود امضای جعلی</button>
+    </form>
+
+    <button onclick="trainModel()">آموزش مدل من</button>
+    <p id="train-status"></p>
+
+    <hr>
+    <a href="/logout">خروج</a>
+  </div>
+
+  <script>
+    function upload(type, formId) {
+      const form = document.getElementById(formId);
+      const data = new FormData(form);
+      fetch(`/upload/${type}`, { method: 'POST', body: data })
+        .then(r => alert("آپلود انجام شد"));
+    }
+
+    document.getElementById("upload-real").addEventListener("submit", e => {
+      e.preventDefault();
+      upload("real", "upload-real");
+    });
+
+    document.getElementById("upload-fake").addEventListener("submit", e => {
+      e.preventDefault();
+      upload("fake", "upload-fake");
+    });
+
+    function trainModel() {
+      fetch("/train", { method: "POST" })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("train-status").innerText =
+            data.status === "done" ? "✅ مدل شما با موفقیت آموزش دید!" : "❌ آموزش مدل انجام نشد";
+        });
+    }
+  </script>
+</body>
+</html>
