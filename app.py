@@ -11,7 +11,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['REMEMBER_COOKIE_DURATION'] = 3600 * 24 * 7  # 7 روز ماندگاری ورود
+app.config['REMEMBER_COOKIE_DURATION'] = 3600 * 24 * 7
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -30,18 +30,14 @@ def register():
     if request.method == "POST":
         username = request.form["username"]
         password = generate_password_hash(request.form["password"])
-
         if User.query.filter_by(username=username).first():
             flash("کاربری با این نام وجود دارد")
             return redirect(url_for("register"))
-
         user = User(username=username, password=password)
         db.session.add(user)
         db.session.commit()
-
         login_user(user, remember=True)
         return redirect(url_for("dashboard"))
-
     return render_template("register.html")
 
 
@@ -49,13 +45,10 @@ def register():
 def login():
     if request.method == "POST":
         user = User.query.filter_by(username=request.form["username"]).first()
-
         if user and check_password_hash(user.password, request.form["password"]):
             login_user(user, remember=True)
             return redirect(url_for("dashboard"))
-
         flash("اطلاعات ورود اشتباه است")
-
     return render_template("login.html")
 
 
@@ -86,14 +79,18 @@ def dashboard():
 @app.route("/upload/<sig_type>", methods=["POST"])
 @login_required
 def upload_signature(sig_type):
-    file = request.files["file"]
-    if file and sig_type in ["real", "fake"]:
+    files = request.files.getlist("files")
+    if files and sig_type in ["real", "fake"]:
         folder = os.path.join(app.config["UPLOAD_FOLDER"], str(current_user.id), sig_type)
         os.makedirs(folder, exist_ok=True)
-        path = os.path.join(folder, file.filename)
-        file.save(path)
-        sig = Signature(filename=file.filename, type=sig_type, user_id=current_user.id)
-        db.session.add(sig)
+
+        for file in files:
+            filename = str(uuid.uuid4()) + ".png"
+            path = os.path.join(folder, filename)
+            file.save(path)
+            sig = Signature(filename=filename, type=sig_type, user_id=current_user.id)
+            db.session.add(sig)
+
         db.session.commit()
         return "OK"
     return "Failed"
