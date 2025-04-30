@@ -18,7 +18,8 @@ def load_user_data(user_id, base_folder="uploads"):
 def train_user_model(user_id):
     try:
         X, y = load_user_data(user_id)
-        if len(X) < 10: return None
+        if len(X) < 10:
+            return None
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
         pca = PCA(n_components=min(20, X.shape[0], X.shape[1]))
@@ -33,6 +34,7 @@ def train_user_model(user_id):
         return None
 
 def predict_signature(user_id, img_path):
+    """پیش‌بینی بدون بازگشت confidence"""
     try:
         model, scaler, pca = joblib.load(f"user_models/{user_id}.pkl")
         feature = extract_hog_feature(preprocess_image(img_path)).reshape(1, -1)
@@ -42,3 +44,17 @@ def predict_signature(user_id, img_path):
         return "امضا معتبر است ✅" if pred == 1 else "امضا جعلی است ❌"
     except:
         return "مدل آموزش داده نشده یا خطا در پردازش تصویر ⛔"
+
+def predict_signature_with_conf(user_id, img_path):
+    """پیش‌بینی همراه با confidence score (احتمال)"""
+    try:
+        model, scaler, pca = joblib.load(f"user_models/{user_id}.pkl")
+        feature = extract_hog_feature(preprocess_image(img_path)).reshape(1, -1)
+        feature = scaler.transform(feature)
+        feature = pca.transform(feature)
+        probs = model.predict_proba(feature)[0]
+        # اگر طبقه‌ی 1 (معتبر) احتمال بالاتری داشته باشد، اعتبار آن را نمایش بده
+        pred = "امضا معتبر است ✅" if probs[1] > probs[0] else "امضا جعلی است ❌"
+        return pred, max(probs)
+    except:
+        return "مدل آموزش داده نشده یا خطا در پردازش تصویر ⛔", 0.0
