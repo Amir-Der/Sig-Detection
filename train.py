@@ -55,6 +55,6 @@ def predict_signature_with_conf(user_id, img_path):
         probs = model.predict_proba(feature)[0]
         # اگر طبقه‌ی 1 (معتبر) احتمال بالاتری داشته باشد، اعتبار آن را نمایش بده
         pred = "امضا معتبر است ✅" if probs[1] > probs[0] else "امضا جعلی است ❌"
-        return pred, max(probs)
+        return pred
     except:
         return "مدل آموزش داده نشده یا خطا در پردازش تصویر ⛔", 0.0
