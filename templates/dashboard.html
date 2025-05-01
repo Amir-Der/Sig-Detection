@@ -8,14 +8,14 @@
 </head>
 <body>
   <div class="site-header">
-    <h1>سامانه تشخیص امضای جعلی</h1>
-    <p>پروژه‌ی دانش‌آموزی با هدف افزایش امنیت احراز هویت</p>
+    <h1>سامانه هوشمند تشخیص امضای جعلی</h1>
+    <p>پروژۀ دانش‌آموزی با هدف افزایش امنیت در احراز هویت</p>
   </div>
 
   <div class="container">
     <div class="tab-buttons">
-      <button class="tab active" onclick="showTab(event, 'upload-test')">آپلود برای تست</button>
-      <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
+      <button class="tab active" onclick="showTab(event, 'upload-test')">تست امضا</button>
+      <button class="tab" onclick="showTab(event, 'upload-train')">آموزش مدل</button>
     </div>
 
     <!-- فرم تست -->
@@ -31,9 +31,9 @@
     <!-- فرم آموزش -->
     <div class="tab-content hidden" id="upload-train">
       <form id="train-form" method="POST" enctype="multipart/form-data">
-        <label>آپلود ۱۰ امضای واقعی:</label>
+        <label>آپلود امضا‌های واقعی:</label>
         <input type="file" name="real_files" accept="image/*" multiple required>
-        <label>آپلود ۱۰ امضای جعلی:</label>
+        <label>آپلود امضا‌های جعلی:</label>
         <input type="file" name="fake_files" accept="image/*" multiple required>
         <button type="submit">آموزش مدل</button>
         <div class="result" id="result-train"></div>
@@ -45,11 +45,11 @@
   <div class="site-footer">
     <div class="footer-section">
       <h4>درباره پروژه</h4>
-      <p>پروژه‌ی دانش‌آموزی با دقت بالا جهت تشخیص خودکار امضای جعلی</p>
+    <p>پروژه‌ای دانش‌آموزی برای تشخیص امضای جعلی با استفاده از الگوریتم‌های SVM و HOG</p>
     </div>
     <div class="footer-section">
-      <h4>طراحی</h4>
-      <p>توسط امیرمحمد درخشان و محمد بهرامگیری</p>
+      <h4>طراحان</h4>
+      <p>امیرمحمد درخشان و محمد بهرامگیری</p>
     </div>
   </div>
 
