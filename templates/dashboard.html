@@ -2,154 +2,80 @@
 <html lang="fa" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>داشبورد کاربر</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تشخیص امضای جعلی</title>
   <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-  <header class="site-header">
-    <h1>سامانه هوشمند تشخیص امضای جعلی</h1>
-    <p>با دقت ۹۹.۵٪ مبتنی بر یادگیری ماشین</p>
-    <button id="dark-toggle">🌙</button>
-  </header>
+  <div class="site-header">
+    <h1>سامانه تشخیص امضای جعلی</h1>
+    <p>پروژه‌ی دانش‌آموزی با هدف افزایش امنیت احراز هویت</p>
+  </div>
 
-  <div class="card">
+  <div class="container">
     <div class="tab-buttons">
-      <button class="tab active" data-tab="test">🧪 بررسی امضا</button>
-      <button class="tab" data-tab="train">📂 آموزش مدل من</button>
-      <button class="tab" data-tab="history">🕘 تاریخچه</button>
+      <button class="tab active" onclick="showTab('upload-test')">آپلود برای تست</button>
+      <button class="tab" onclick="showTab('upload-train')">آپلود برای آموزش</button>
     </div>
 
-    <div class="tab-content" id="test">
-      <form id="form-test">
-        <label>آپلود تصویر امضا:</label>
-        <input type="file" id="test-file" accept="image/*" required>
-        <div id="preview" class="preview"></div>
+    <div class="tab-content" id="upload-test">
+      <form id="test-form" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
         <button type="submit">بررسی امضا</button>
+        <div class="preview" id="preview-test"></div>
+        <div class="result" id="result-test"></div>
       </form>
-      <div id="result" class="result"></div>
     </div>
 
-    <div class="tab-content hidden" id="train">
-      <form id="form-train-real">
-        <label>آپلود امضاهای معتبر (حداقل ۱۰):</label>
-        <input type="file" id="train-real" accept="image/*" multiple required>
-        <button type="submit">بارگذاری معتبرها</button>
+    <div class="tab-content hidden" id="upload-train">
+      <form id="train-form" method="POST" enctype="multipart/form-data">
+        <label>آپلود ۱۰ امضای واقعی:</label>
+        <input type="file" name="real_files" accept="image/*" multiple required>
+        <label>آپلود ۱۰ امضای جعلی:</label>
+        <input type="file" name="fake_files" accept="image/*" multiple required>
+        <button type="submit">آموزش مدل</button>
+        <div class="result" id="result-train"></div>
       </form>
-      <form id="form-train-fake">
-        <label>آپلود امضاهای جعلی (حداقل ۱۰):</label>
-        <input type="file" id="train-fake" accept="image/*" multiple required>
-        <button type="submit">بارگذاری جعلی‌ها</button>
-      </form>
-      <button id="btn-train-model">آموزش مدل</button>
-      <div class="progress-bar hidden">
-        <div class="progress-fill" id="train-progress"></div>
-      </div>
-      <p id="train-status"></p>
-    </div>
-
-    <div class="tab-content hidden" id="history">
-      <h3>تاریخچهٔ تست‌ها</h3>
-      <ul id="history-list"></ul>
     </div>
   </div>
 
-  <footer class="site-footer">
+  <div class="site-footer">
     <div class="footer-section">
       <h4>درباره پروژه</h4>
-      <p>پروژه دانشجویی با هدف شناسایی امضای جعلی</p>
+      <p>پروژه‌ی دانش‌آموزی با دقت بالا جهت تشخیص خودکار امضای جعلی</p>
     </div>
     <div class="footer-section">
-      <h4>تیم ما</h4>
-      <p>امیرمحمد درخشان & محمد بهرامگیری</p>
+      <h4>طراحی</h4>
+      <p>توسط امیرمحمد درخشان و محمد بهرامگیری</p>
     </div>
-    <div class="footer-section">
-      <h4>گیت‌هاب</h4>
-      <p><a href="https://github.com/Amir-Der/Sig-Detection" target="_blank">Sig-Detection</a></p>
-    </div>
-  </footer>
+  </div>
 
   <script>
-    // dark mode toggle
-    document.getElementById('dark-toggle').addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-    });
-
-    // tab switching
-    document.querySelectorAll('.tab').forEach(btn => {
-      btn.addEventListener('click', e => {
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        const tab = e.currentTarget.dataset.tab;
-        document.getElementById(tab).classList.remove('hidden');
-        e.currentTarget.classList.add('active');
-      });
-    });
-
-    // preview for test
-    document.getElementById('test-file').addEventListener('change', e => {
-      const p = document.getElementById('preview');
-      p.innerHTML = '';
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        const img = document.createElement('img');
-        img.src = evt.target.result;
-        p.appendChild(img);
-      };
-      reader.readAsDataURL(file);
-    });
-
-    // handle test form
-    document.getElementById('form-test').addEventListener('submit', async e => {
-      e.preventDefault();
-      const file = document.getElementById('test-file').files[0];
-      const data = new FormData();
-      data.append('file', file);
-      const res = await fetch('/', { method:'POST', body:data });
-      const json = await res.json();
-      document.getElementById('result').innerText =
-        `${json.result} (اعتماد: ${Math.round(json.confidence*100)}%)`;
-      // save to history
-      const li = document.createElement('li');
-      li.innerText = `${new Date().toLocaleString()}: ${json.result}`;
-      document.getElementById('history-list').prepend(li);
-    });
-
-    // handle train uploads
-    async function handleUpload(inputId, type) {
-      const input = document.getElementById(inputId);
-      const data = new FormData();
-      for (let f of input.files) data.append('files', f);
-      await fetch(`/upload/${type}`, { method:'POST', body:data });
-      alert('آپلود انجام شد');
+    function showTab(id) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
     }
-    document.getElementById('form-train-real').addEventListener('submit', e => {
-      e.preventDefault(); handleUpload('train-real','real');
-    });
-    document.getElementById('form-train-fake').addEventListener('submit', e => {
-      e.preventDefault(); handleUpload('train-fake','fake');
+
+    document.getElementById('test-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+      const res = await fetch("/", { method: "POST", body: formData });
+      const data = await res.json();
+      document.getElementById('result-test').innerText = data.result;
     });
 
-    // train model with progress bar
-    document.getElementById('btn-train-model').addEventListener('click', async () => {
-      const bar = document.querySelector('.progress-bar');
-      const fill = document.getElementById('train-progress');
-      const status = document.getElementById('train-status');
-      bar.classList.remove('hidden');
-      fill.style.width = '0%';
-      status.innerText = 'در حال آموزش...';
-      for (let i=10; i<=100; i+=10) {
-        await new Promise(r=>setTimeout(r,200));
-        fill.style.width = `${i}%`;
+    document.getElementById('test-form').file.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          document.getElementById('preview-test').innerHTML = `<img src="${e.target.result}" alt="پیش‌نمایش">`;
+        };
+        reader.readAsDataURL(file);
       }
-      const res = await fetch('/train', { method:'POST' });
-      const json = await res.json();
-      status.innerText = json.status==='done'
-        ? '✅ مدل شما با موفقیت آموزش دید!'
-        : '❌ آموزش مدل شکست خورد';
-      setTimeout(()=>bar.classList.add('hidden'),1000);
     });
   </script>
 </body>
