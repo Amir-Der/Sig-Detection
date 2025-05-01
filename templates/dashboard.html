@@ -39,59 +39,20 @@
   </div>
 
   <script>
-    function showTab(e, id) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-      e.target.classList.add('active');
+  document.getElementById('test-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fileInput = document.querySelector('#test-form input[name="file"]');
+    if (!fileInput.files.length) {
+      document.getElementById('result-test').innerText = 'لطفاً یک فایل انتخاب کنید.';
+      return;
     }
+    const formData = new FormData();
+    formData.append("file", fileInput.files[0]);
+    const res = await fetch("/", { method: "POST", body: formData });
+    const data = await res.json();
+    document.getElementById('result-test').innerText = data.result;
+  });
+</script>
 
-    // فرم تست
-    document.getElementById('test-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const fileInput = document.querySelector('#test-form input[name="file"]');
-      const resultDiv = document.getElementById('result-test');
-      if (!fileInput.files.length) {
-        resultDiv.innerText = 'لطفاً یک فایل انتخاب کنید.';
-        return;
-      }
-      const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
-
-      try {
-        const res = await fetch("/", { method: "POST", body: formData });
-        const data = await res.json();
-        resultDiv.innerText = data.result || 'پاسخی دریافت نشد';
-      } catch (err) {
-        resultDiv.innerText = 'خطا در ارتباط با سرور';
-      }
-    });
-
-    // پیش‌نمایش تست
-    document.querySelector('#test-form input[name="file"]').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          document.getElementById('preview-test').innerHTML = `<img src="${ev.target.result}" alt="پیش‌نمایش">`;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-
-    // فرم آموزش
-    document.getElementById('train-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-
-      const res = await fetch("/train", {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      document.getElementById('result-train').innerText = data.result || 'خطا در آموزش مدل';
-    });
-  </script>
 </body>
 </html>
