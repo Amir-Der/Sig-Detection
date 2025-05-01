@@ -12,17 +12,16 @@ def load_user_data(user_id, base_folder="uploads"):
     real = [extract_hog_feature(preprocess_image(p)) for p in real_path.glob("*.png")]
     fake = [extract_hog_feature(preprocess_image(p)) for p in fake_path.glob("*.png")]
     X = np.array(real + fake, dtype=np.float32)
-    y = np.array([1]*len(real) + [0]*len(fake))
+    y = np.array([1] * len(real) + [0] * len(fake))
     return X, y
 
 def train_user_model(user_id):
     try:
         X, y = load_user_data(user_id)
-        if len(X) < 10:
-            return None
+        if len(X) < 10: return None
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
-        pca = PCA(n_components=min(20, X.shape[0], X.shape[1]))
+        pca = PCA(n_components=min(20, len(X), X.shape[1]))
         X_pca = pca.fit_transform(X_scaled)
         model = SVC(C=10, gamma=0.001, probability=True)
         model.fit(X_pca, y)
@@ -33,28 +32,15 @@ def train_user_model(user_id):
     except Exception:
         return None
 
-def predict_signature(user_id, img_path):
-    """پیش‌بینی بدون بازگشت confidence"""
-    try:
-        model, scaler, pca = joblib.load(f"user_models/{user_id}.pkl")
-        feature = extract_hog_feature(preprocess_image(img_path)).reshape(1, -1)
-        feature = scaler.transform(feature)
-        feature = pca.transform(feature)
-        pred = model.predict(feature)[0]
-        return "امضا معتبر است ✅" if pred == 1 else "امضا جعلی است ❌"
-    except:
-        return "مدل آموزش داده نشده یا خطا در پردازش تصویر ⛔"
-
 def predict_signature_with_conf(user_id, img_path):
-    """پیش‌بینی همراه با confidence score (احتمال)"""
     try:
         model, scaler, pca = joblib.load(f"user_models/{user_id}.pkl")
         feature = extract_hog_feature(preprocess_image(img_path)).reshape(1, -1)
         feature = scaler.transform(feature)
         feature = pca.transform(feature)
-        probs = model.predict_proba(feature)[0]
-        # اگر طبقه‌ی 1 (معتبر) احتمال بالاتری داشته باشد، اعتبار آن را نمایش بده
-        pred = "امضا معتبر است ✅" if probs[1] > probs[0] else "امضا جعلی است ❌"
-        return pred
+        prob = model.predict_proba(feature)[0][1]
+        pred = model.predict(feature)[0]
+        label = "امضا معتبر است ✅" if pred == 1 else "امضا جعلی است ❌"
+        return label, float(prob)
     except:
-        return "مدل آموزش داده نشده یا خطا در پردازش تصویر ⛔", 0.0
+        return "⛔ مدل آموزش داده نشده یا خطا در پردازش تصویر", 0
