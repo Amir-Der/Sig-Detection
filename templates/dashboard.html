@@ -14,10 +14,11 @@
 
   <div class="container">
     <div class="tab-buttons">
-      <button class="tab active" onclick="showTab('upload-test')">آپلود برای تست</button>
-      <button class="tab" onclick="showTab('upload-train')">آپلود برای آموزش</button>
+      <button class="tab active" onclick="showTab(event, 'upload-test')">آپلود برای تست</button>
+      <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
     </div>
 
+    <!-- فرم تست -->
     <div class="tab-content" id="upload-test">
       <form id="test-form" method="POST" enctype="multipart/form-data">
         <input type="file" name="file" accept="image/*" required>
@@ -27,6 +28,7 @@
       </form>
     </div>
 
+    <!-- فرم آموزش -->
     <div class="tab-content hidden" id="upload-train">
       <form id="train-form" method="POST" enctype="multipart/form-data">
         <label>آپلود ۱۰ امضای واقعی:</label>
@@ -39,6 +41,7 @@
     </div>
   </div>
 
+  <!-- فوتر سایت -->
   <div class="site-footer">
     <div class="footer-section">
       <h4>درباره پروژه</h4>
@@ -50,32 +53,55 @@
     </div>
   </div>
 
+  <!-- اسکریپت -->
   <script>
-    function showTab(id) {
-      document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
+    function showTab(e, id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      event.target.classList.add('active');
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
     }
 
+    // فرم تست
     document.getElementById('test-form').addEventListener('submit', async e => {
       e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-      const res = await fetch("/", { method: "POST", body: formData });
+      const fileInput = document.querySelector('#test-form input[name=\"file\"]');
+      if (!fileInput.files.length) {
+        document.getElementById('result-test').innerText = 'لطفاً یک فایل انتخاب کنید.';
+        return;
+      }
+      const formData = new FormData();
+      formData.append(\"file\", fileInput.files[0]);
+
+      const res = await fetch(\"/\", { method: \"POST\", body: formData });
       const data = await res.json();
       document.getElementById('result-test').innerText = data.result;
     });
 
-    document.getElementById('test-form').file.addEventListener('change', e => {
+    // پیش‌نمایش تست
+    document.querySelector('#test-form input[name=\"file\"]').addEventListener('change', e => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
-        reader.onload = e => {
-          document.getElementById('preview-test').innerHTML = `<img src="${e.target.result}" alt="پیش‌نمایش">`;
+        reader.onload = ev => {
+          document.getElementById('preview-test').innerHTML = `<img src=\"${ev.target.result}\" alt=\"پیش‌نمایش\">`;
         };
         reader.readAsDataURL(file);
       }
+    });
+
+    // فرم آموزش (نمایشی – ارسال به سرور بستگی به backend دارد)
+    document.getElementById('train-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const res = await fetch(\"/train\", {
+        method: \"POST\",
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById('result-train').innerText = data.message || data.result;
     });
   </script>
 </body>
