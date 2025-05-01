@@ -75,7 +75,7 @@ def dashboard():
         file.save(path)
         result, _ = predict_signature_with_conf(current_user.id, path)
         os.remove(path)
-        return jsonify(result=result)
+        return jsonify({"result": result})  # باید dict برگردانده شود
     return render_template("dashboard.html")
 
 @app.route("/upload/<sig_type>", methods=["POST"])
