@@ -8,7 +8,6 @@ from train import train_user_model, predict_signature_with_conf
 import os, uuid, joblib, subprocess
 from dotenv import load_dotenv
 
-# بارگذاری متغیرهای محیطی (توکن GitHub و URL ریپو)
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")
@@ -17,7 +16,6 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['REMEMBER_COOKIE_DURATION'] = 3600 * 24 * 7
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -29,23 +27,6 @@ with app.app_context():
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-
-def save_model_to_github(user_id, model, scaler, pca):
-    try:
-        os.makedirs("usermodels", exist_ok=True)
-        path = f"usermodels/{user_id}.pkl"
-        joblib.dump((model, scaler, pca), path)
-
-        # خودکار اضافه و کامیت و پوش به GitHub
-        subprocess.run(["git", "add", path], check=True)
-        subprocess.run(["git", "commit", "-m", f"Add model for user {user_id}"], check=True)
-        # حذف https:// اول آدرس برای پست شدن
-        repo = GITHUB_REPO.replace("https://", "")
-        subprocess.run(["git", "push", f"https://{GITHUB_TOKEN}@{repo}"], check=True)
-    except Exception as e:
-        print("GitHub save failed:", e)
-
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -62,7 +43,6 @@ def register():
         return redirect(url_for("dashboard"))
     return render_template("register.html")
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -73,13 +53,11 @@ def login():
         flash("اطلاعات ورود اشتباه است")
     return render_template("login.html")
 
-
 @app.route("/logout")
 @login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
-
 
 @app.route("/", methods=["GET", "POST"])
 @login_required
@@ -87,19 +65,16 @@ def dashboard():
     if request.method == "POST":
         file = request.files.get("file")
         if not file:
-            return jsonify(result="فایلی ارسال نشده", confidence=0)
-        # ذخیره موقت
+            return jsonify(result="فایلی ارسال نشده")
         filename = str(uuid.uuid4()) + ".png"
         folder = os.path.join(app.config["UPLOAD_FOLDER"], str(current_user.id))
         os.makedirs(folder, exist_ok=True)
         filepath = os.path.join(folder, filename)
         file.save(filepath)
-        # پیش‌بینی با confidence
         result, confidence = predict_signature_with_conf(current_user.id, filepath)
         os.remove(filepath)
         return jsonify(result=result)
     return render_template("dashboard.html")
-
 
 @app.route("/upload/<sig_type>", methods=["POST"])
 @login_required
@@ -118,7 +93,6 @@ def upload_signature(sig_type):
         return "OK"
     return "Failed"
 
-
 @app.route("/train", methods=["POST"])
 @login_required
 def train_model():
@@ -128,7 +102,6 @@ def train_model():
     real_path = os.path.join(user_folder, "real")
     fake_path = os.path.join(user_folder, "fake")
 
-    # ذخیره فایل‌ها
     os.makedirs(real_path, exist_ok=True)
     os.makedirs(fake_path, exist_ok=True)
     for f in real_files:
@@ -136,7 +109,6 @@ def train_model():
     for f in fake_files:
         f.save(os.path.join(fake_path, f.filename))
 
-    # آموزش مدل
     model_path = train_user_model(current_user.id)
     if model_path:
         return jsonify({"result": "✅ مدل با موفقیت آموزش داده شد."})
