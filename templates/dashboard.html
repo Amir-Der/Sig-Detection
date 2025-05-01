@@ -1,39 +1,36 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>تشخیص امضای جعلی</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div class="site-header">
-    <h1>سامانه هوشمند تشخیص امضای جعلی</h1>
-    <p>پروژۀ دانش‌آموزی با هدف افزایش امنیت در احراز هویت</p>
+    <h1>سامانه تشخیص امضای جعلی</h1>
+    <p>پروژه‌ی دانش‌آموزی با هدف افزایش امنیت احراز هویت</p>
   </div>
 
   <div class="container">
     <div class="tab-buttons">
-      <button class="tab active" onclick="showTab(event, 'upload-test')">تست امضا</button>
-      <button class="tab" onclick="showTab(event, 'upload-train')">آموزش مدل</button>
+      <button class="tab active" onclick="showTab(event, 'upload-test')">آپلود برای تست</button>
+      <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
     </div>
 
-    <!-- فرم تست -->
     <div class="tab-content" id="upload-test">
       <form id="test-form" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
+        <input type="file" name="file" accept="image/*" required />
         <button type="submit">بررسی امضا</button>
         <div class="preview" id="preview-test"></div>
         <div class="result" id="result-test"></div>
       </form>
     </div>
 
-    <!-- فرم آموزش -->
     <div class="tab-content hidden" id="upload-train">
       <form id="train-form" method="POST" enctype="multipart/form-data">
-        <label>آپلود امضا‌های واقعی:</label>
+        <label>آپلود ۱۰ امضای واقعی:</label>
         <input type="file" name="real_files" accept="image/*" multiple required>
-        <label>آپلود امضا‌های جعلی:</label>
+        <label>آپلود ۱۰ امضای جعلی:</label>
         <input type="file" name="fake_files" accept="image/*" multiple required>
         <button type="submit">آموزش مدل</button>
         <div class="result" id="result-train"></div>
@@ -41,19 +38,6 @@
     </div>
   </div>
 
-  <!-- فوتر سایت -->
-  <div class="site-footer">
-    <div class="footer-section">
-      <h4>درباره پروژه</h4>
-    <p>پروژه‌ای دانش‌آموزی برای تشخیص امضای جعلی با استفاده از الگوریتم‌های SVM و HOG</p>
-    </div>
-    <div class="footer-section">
-      <h4>طراحان</h4>
-      <p>امیرمحمد درخشان و محمد بهرامگیری</p>
-    </div>
-  </div>
-
-  <!-- اسکریپت -->
   <script>
     function showTab(e, id) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -66,16 +50,21 @@
     document.getElementById('test-form').addEventListener('submit', async e => {
       e.preventDefault();
       const fileInput = document.querySelector('#test-form input[name="file"]');
+      const resultDiv = document.getElementById('result-test');
       if (!fileInput.files.length) {
-        document.getElementById('result-test').innerText = 'لطفاً یک فایل انتخاب کنید.';
+        resultDiv.innerText = 'لطفاً یک فایل انتخاب کنید.';
         return;
       }
       const formData = new FormData();
       formData.append("file", fileInput.files[0]);
 
-      const res = await fetch("/", { method: "POST", body: formData });
-      const data = await res.json();
-      document.getElementById('result-test').innerText = data.result;
+      try {
+        const res = await fetch("/", { method: "POST", body: formData });
+        const data = await res.json();
+        resultDiv.innerText = data.result || 'پاسخی دریافت نشد';
+      } catch (err) {
+        resultDiv.innerText = 'خطا در ارتباط با سرور';
+      }
     });
 
     // پیش‌نمایش تست
@@ -93,7 +82,6 @@
     // فرم آموزش
     document.getElementById('train-form').addEventListener('submit', async e => {
       e.preventDefault();
-      console.log("در حال ارسال فرم آموزش...");
       const form = e.target;
       const formData = new FormData(form);
 
@@ -102,7 +90,7 @@
         body: formData
       });
       const data = await res.json();
-      document.getElementById('result-train').innerText = data.message || data.result || 'پاسخی دریافت نشد';
+      document.getElementById('result-train').innerText = data.result || 'خطا در آموزش مدل';
     });
   </script>
 </body>
