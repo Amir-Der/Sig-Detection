@@ -121,19 +121,26 @@ def upload_signature(sig_type):
 
 @app.route("/train", methods=["POST"])
 @login_required
-def train():
+def train_model():
+    real_files = request.files.getlist("real_files")
+    fake_files = request.files.getlist("fake_files")
+    user_folder = os.path.join("uploads", str(current_user.id))
+    real_path = os.path.join(user_folder, "real")
+    fake_path = os.path.join(user_folder, "fake")
+
+    # ذخیره فایل‌ها
+    os.makedirs(real_path, exist_ok=True)
+    os.makedirs(fake_path, exist_ok=True)
+    for f in real_files:
+        f.save(os.path.join(real_path, f.filename))
+    for f in fake_files:
+        f.save(os.path.join(fake_path, f.filename))
+
+    # آموزش مدل
     model_path = train_user_model(current_user.id)
     if model_path:
-        # ذخیره مدل روی GitHub
-        model, scaler, pca = joblib.load(model_path)
-        save_model_to_github(current_user.id, model, scaler, pca)
-        # علامت‌گذاری کاربر
-        user = User.query.get(current_user.id)
-        user.has_model = True
-        db.session.commit()
-        return jsonify(status="done")
-    return jsonify(status="fail")
-
+        return jsonify({"result": "✅ مدل با موفقیت آموزش داده شد."})
+    return jsonify({"result": "⛔ خطا در آموزش مدل."})
 
 if __name__ == "__main__":
     app.run(debug=True)
