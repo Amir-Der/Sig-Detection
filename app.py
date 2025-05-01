@@ -8,6 +8,7 @@ from train import train_user_model, predict_signature_with_conf
 import os, uuid, joblib, subprocess
 from dotenv import load_dotenv
 
+# بارگذاری متغیرهای محیطی (GitHub)
 load_dotenv()
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_REPO = os.getenv("GITHUB_REPO")
@@ -16,6 +17,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret-key'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['REMEMBER_COOKIE_DURATION'] = 3600 * 24 * 7
 
 db.init_app(app)
 login_manager = LoginManager(app)
@@ -69,10 +71,10 @@ def dashboard():
         filename = str(uuid.uuid4()) + ".png"
         folder = os.path.join(app.config["UPLOAD_FOLDER"], str(current_user.id))
         os.makedirs(folder, exist_ok=True)
-        filepath = os.path.join(folder, filename)
-        file.save(filepath)
-        result, confidence = predict_signature_with_conf(current_user.id, filepath)
-        os.remove(filepath)
+        path = os.path.join(folder, filename)
+        file.save(path)
+        result, _ = predict_signature_with_conf(current_user.id, path)
+        os.remove(path)
         return jsonify(result=result)
     return render_template("dashboard.html")
 
@@ -101,14 +103,12 @@ def train_model():
     user_folder = os.path.join("uploads", str(current_user.id))
     real_path = os.path.join(user_folder, "real")
     fake_path = os.path.join(user_folder, "fake")
-
     os.makedirs(real_path, exist_ok=True)
     os.makedirs(fake_path, exist_ok=True)
     for f in real_files:
         f.save(os.path.join(real_path, f.filename))
     for f in fake_files:
         f.save(os.path.join(fake_path, f.filename))
-
     model_path = train_user_model(current_user.id)
     if model_path:
         return jsonify({"result": "✅ مدل با موفقیت آموزش داده شد."})
