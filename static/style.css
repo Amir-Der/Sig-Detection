@@ -1,4 +1,4 @@
-/* ⏺ style.css نسخه نهایی با مرکزچین کردن فرم‌های Login/Register و تنظیم فونت IRANSans */
+/* ⏺ style.css نسخه نهایی با مرکزچین کردن فرم‌ها و تنظیم حالت شب */
 
 @font-face {
   font-family: 'IRANSans';
@@ -8,7 +8,6 @@
   font-style: normal;
 }
 
-/* پایه */
 html, body {
   margin: 0;
   padding: 0;
@@ -20,10 +19,27 @@ html, body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
-/* کانتینر مرکزی برای فرم‌ها */
+body.dark {
+  background: linear-gradient(135deg, #1e1e1e, #2c2c2c);
+  color: #eee;
+}
+body.dark .card,
+body.dark .container {
+  background: rgba(0,0,0,0.4);
+  color: #eee;
+}
+body.dark button {
+  background: #444;
+  color: #fff;
+}
+body.dark .tab.active {
+  background: #666;
+  color: #fff;
+}
+
 .container {
   display: flex;
   flex-direction: column;
@@ -36,26 +52,35 @@ html, body {
   backdrop-filter: blur(10px);
   border-radius: 16px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+  margin-top: 100px;
 }
 
-/* هدر سایت */
 .site-header {
   text-align: center;
-  padding: 20px;
+  padding: 10px;
   width: 100%;
-  max-width: 600px;
-  margin-bottom: 20px;
+  position: fixed;
+  top: 0;
+  background: rgba(255,255,255,0.6);
+  backdrop-filter: blur(5px);
+  z-index: 999;
+}
+body.dark .site-header {
+  background: rgba(0,0,0,0.6);
 }
 .site-header h1 {
-  font-size: 2rem;
-  margin-bottom: 10px;
+  font-size: 1.5rem;
+  margin: 0;
 }
 .site-header p {
-  font-size: 1rem;
+  font-size: 0.9rem;
+  margin: 4px 0 0;
   color: #444;
 }
+body.dark .site-header p {
+  color: #ccc;
+}
 
-/* کارت داشبورد */
 .card {
   background: rgba(255,255,255,0.5);
   backdrop-filter: blur(10px);
@@ -64,10 +89,10 @@ html, body {
   padding: 20px;
   width: 90%;
   max-width: 600px;
+  margin-top: 140px;
   margin-bottom: 20px;
 }
 
-/* تب‌ها */
 .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
 .tab {
   flex: 1;
@@ -83,11 +108,9 @@ html, body {
 .tab.active { background: #23a6d5; color: #fff; }
 .tab:hover:not(.active) { background: rgba(0,0,0,0.1); }
 
-/* محتوا */
 .tab-content { display: block; }
 .hidden { display: none; }
 
-/* ورودی‌ها و دکمه‌ها */
 input[type="file"], button {
   width: 100%;
   margin: 10px 0;
@@ -107,7 +130,6 @@ button {
 }
 button:hover { background: #1c8eb4; }
 
-/* پیش‌نمایش */
 .preview img {
   max-width: 100px;
   margin-top: 10px;
@@ -119,7 +141,6 @@ button:hover { background: #1c8eb4; }
   font-weight: bold;
 }
 
-/* نوار پیشرفت */
 .progress-bar {
   width: 100%;
   height: 8px;
@@ -128,27 +149,43 @@ button:hover { background: #1c8eb4; }
   overflow: hidden;
   margin: 10px 0;
 }
-.progress-fill { width: 0%; height: 100%; background: #23a6d5; transition: width 0.5s; }
+.progress-fill {
+  width: 0%; height: 100%; background: #23a6d5; transition: width 0.5s;
+}
 
-/* فوتر */
 .site-footer {
   width: 100%;
-  max-width: 600px;
+  background: rgba(255,255,255,0.4);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: space-around;
-  flex-wrap: wrap;
   gap: 20px;
-  margin-top: 20px;
-}
-.site-footer h4 { margin-bottom: 8px; }
-.site-footer p, .site-footer a {
+  padding: 10px 0;
+  flex-wrap: wrap;
   font-size: 0.9rem;
+  text-align: center;
+}
+body.dark .site-footer {
+  background: rgba(0,0,0,0.4);
+}
+.site-footer .footer-section {
+  flex: 1;
+  min-width: 150px;
+}
+.site-footer h4 {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
+.site-footer p, .site-footer a {
+  margin: 0;
   color: #444;
   text-decoration: none;
 }
+body.dark .site-footer p, body.dark .site-footer a {
+  color: #ccc;
+}
 .site-footer a:hover { text-decoration: underline; }
 
-/* ریسپانسیو */
 @media (max-width: 600px) {
   .tab-buttons { flex-direction: column; }
 }
