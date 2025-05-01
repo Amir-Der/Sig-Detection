@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>تشخیص امضای جعلی</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
   <div class="site-header">
@@ -17,15 +18,17 @@
       <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
     </div>
 
+    <!-- فرم تست -->
     <div class="tab-content" id="upload-test">
       <form id="test-form" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required />
+        <input type="file" name="file" accept="image/*" required>
         <button type="submit">بررسی امضا</button>
         <div class="preview" id="preview-test"></div>
         <div class="result" id="result-test"></div>
       </form>
     </div>
 
+    <!-- فرم آموزش -->
     <div class="tab-content hidden" id="upload-train">
       <form id="train-form" method="POST" enctype="multipart/form-data">
         <label>آپلود ۱۰ امضای واقعی:</label>
@@ -38,21 +41,65 @@
     </div>
   </div>
 
-  <script>
-  document.getElementById('test-form').addEventListener('submit', async e => {
-    e.preventDefault();
-    const fileInput = document.querySelector('#test-form input[name="file"]');
-    if (!fileInput.files.length) {
-      document.getElementById('result-test').innerText = 'لطفاً یک فایل انتخاب کنید.';
-      return;
-    }
-    const formData = new FormData();
-    formData.append("file", fileInput.files[0]);
-    const res = await fetch("/", { method: "POST", body: formData });
-    const data = await res.json();
-    document.getElementById('result-test').innerText = data.result;
-  });
-</script>
+  <!-- فوتر سایت -->
+  <div class="site-footer">
+    <div class="footer-section">
+      <h4>درباره پروژه</h4>
+      <p>پروژه‌ی دانش‌آموزی با دقت بالا جهت تشخیص خودکار امضای جعلی</p>
+    </div>
+    <div class="footer-section">
+      <h4>طراحی</h4>
+      <p>توسط امیرمحمد درخشان و محمد بهرامگیری</p>
+    </div>
+  </div>
 
+  <!-- اسکریپت -->
+  <script>
+    function showTab(e, id) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(id).classList.remove('hidden');
+      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+
+    document.getElementById('test-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const fileInput = document.querySelector('#test-form input[name="file"]');
+      if (!fileInput.files.length) {
+        document.getElementById('result-test').innerText = 'لطفاً یک فایل انتخاب کنید.';
+        return;
+      }
+      const formData = new FormData();
+      formData.append("file", fileInput.files[0]);
+
+      const res = await fetch("/", { method: "POST", body: formData });
+      const data = await res.json();
+      document.getElementById('result-test').innerText = data.result;
+    });
+
+    document.querySelector('#test-form input[name="file"]').addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          document.getElementById('preview-test').innerHTML = `<img src="${ev.target.result}" alt="پیش‌نمایش">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    document.getElementById('train-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      const res = await fetch("/train", {
+        method: "POST",
+        body: formData
+      });
+      const data = await res.json();
+      document.getElementById('result-train').innerText = data.message || data.result || 'پاسخی دریافت نشد';
+    });
+  </script>
 </body>
 </html>
