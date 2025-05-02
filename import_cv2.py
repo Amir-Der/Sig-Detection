@@ -1,5 +1,6 @@
 import cv2
 from skimage.feature import hog
+import numpy as np
 
 def preprocess_image(file_stream):
     file_bytes = np.frombuffer(file_stream.read(), np.uint8)
