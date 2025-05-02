@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تشخیص امضای جعلی</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سامانه تشخیص امضای جعلی</title>
+  <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div class="site-header">
@@ -18,30 +18,30 @@
       <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
     </div>
 
-    <!-- فرم تست -->
+    <!-- تب تست -->
     <div class="tab-content" id="upload-test">
-      <form id="test-form" method="POST" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
+      <form id="test-form" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required />
         <button type="submit">بررسی امضا</button>
         <div class="preview" id="preview-test"></div>
         <div class="result" id="result-test"></div>
       </form>
     </div>
 
-    <!-- فرم آموزش -->
+    <!-- تب آموزش -->
     <div class="tab-content hidden" id="upload-train">
-      <form id="train-form" method="POST" enctype="multipart/form-data">
+      <form id="train-form" enctype="multipart/form-data">
         <label>آپلود ۱۰ امضای واقعی:</label>
-        <input type="file" name="real_files" accept="image/*" multiple required>
+        <input type="file" name="real_files" accept="image/*" multiple required />
         <label>آپلود ۱۰ امضای جعلی:</label>
-        <input type="file" name="fake_files" accept="image/*" multiple required>
+        <input type="file" name="fake_files" accept="image/*" multiple required />
         <button type="submit">آموزش مدل</button>
         <div class="result" id="result-train"></div>
       </form>
     </div>
   </div>
 
-  <!-- فوتر سایت -->
+  <!-- فوتر -->
   <div class="site-footer">
     <div class="footer-section">
       <h4>درباره پروژه</h4>
@@ -53,8 +53,8 @@
     </div>
   </div>
 
-  <!-- اسکریپت -->
   <script>
+    // نمایش تب‌ها
     function showTab(e, id) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(id).classList.remove('hidden');
@@ -62,21 +62,41 @@
       e.target.classList.add('active');
     }
 
+    // فرم بررسی امضا
     document.getElementById('test-form').addEventListener('submit', async e => {
       e.preventDefault();
-      const fileInput = document.querySelector('#test-form input[name="file"]');
-      if (!fileInput.files.length) {
-        document.getElementById('result-test').innerText = 'لطفاً یک فایل انتخاب کنید.';
-        return;
-      }
+      const input = document.querySelector('#test-form input[name="file"]');
+      if (!input.files.length) return;
       const formData = new FormData();
-      formData.append("file", fileInput.files[0]);
+      formData.append("file", input.files[0]);
 
-      const res = await fetch("/", { method: "POST", body: formData });
-      const data = await res.json();
-      document.getElementById('result-test').innerText = data.result;
+      try {
+        const res = await fetch("/", { method: "POST", body: formData });
+        const data = await res.json();
+        document.getElementById("result-test").innerText = data.result || "نتیجه‌ای دریافت نشد";
+      } catch (err) {
+        document.getElementById("result-test").innerText = "خطا در ارتباط با سرور";
+      }
     });
 
+    // فرم آموزش مدل
+    document.getElementById('train-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+
+      try {
+        const res = await fetch("/train", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        document.getElementById("result-train").innerText = data.result || "خطا در آموزش";
+      } catch (err) {
+        document.getElementById("result-train").innerText = "خطا در ارسال اطلاعات";
+      }
+    });
+
+    // پیش‌نمایش امضا
     document.querySelector('#test-form input[name="file"]').addEventListener('change', e => {
       const file = e.target.files[0];
       if (file) {
@@ -86,19 +106,6 @@
         };
         reader.readAsDataURL(file);
       }
-    });
-
-    document.getElementById('train-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const form = e.target;
-      const formData = new FormData(form);
-
-      const res = await fetch("/train", {
-        method: "POST",
-        body: formData
-      });
-      const data = await res.json();
-      document.getElementById('result-train').innerText = data.message || data.result || 'پاسخی دریافت نشد';
     });
   </script>
 </body>
