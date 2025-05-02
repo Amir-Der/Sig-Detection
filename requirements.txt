@@ -7,3 +7,4 @@ opencv-python
 joblib
 gunicorn
 python-dotenv
+numpy
