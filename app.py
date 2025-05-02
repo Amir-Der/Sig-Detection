@@ -3,6 +3,7 @@ from import_cv2 import preprocess_image, extract_hog_feature
 from train import train_temp_model, predict_with_temp_model
 import os
 import uuid
+import numpy as np
 
 app = Flask(__name__)
 
