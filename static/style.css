@@ -1,6 +1,6 @@
 @font-face {
-  font-family: 'IRANSansWeb';
-  src: url('/static/fonts/IRANSansWeb.woff2') format('woff2')
+  font-family: 'IRANSans';
+  src: url('/static/fonts/IRANSansWeb.woff2') format('woff2'),
        url('/static/fonts/IRANSansWeb.woff') format('woff');
   font-weight: normal;
   font-style: normal;
@@ -9,62 +9,60 @@
 body {
   margin: 0;
   font-family: 'IRANSans', sans-serif;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.9), rgba(230, 230, 250, 0.6));
-  backdrop-filter: blur(8px);
+  background: linear-gradient(135deg, #f8fafc, #e3e8ff);
+  direction: rtl;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  color: #222;
 }
 
 .site-header {
   text-align: center;
   padding: 2rem 1rem;
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(5px);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .site-header h1 {
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: bold;
+  color: #1e293b;
   margin: 0;
 }
 
-.site-header p {
-  font-size: 1rem;
-  color: #333;
-  margin-top: 0.5rem;
-}
-
 .container {
-  max-width: 600px;
+  max-width: 700px;
   margin: 2rem auto;
   background: rgba(255, 255, 255, 0.6);
   padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.08);
+  border-radius: 18px;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.06);
 }
 
 .tab-buttons {
   display: flex;
+  gap: 1rem;
   justify-content: space-between;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .tab {
   flex: 1;
-  padding: 0.75rem;
-  background: #f0f0f0;
+  padding: 0.75rem 1rem;
+  background: #f3f4f6;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
   font-weight: bold;
+  font-size: 1rem;
+  border-radius: 10px;
+  transition: background 0.3s ease;
 }
 
 .tab.active {
-  background: #333;
+  background: #334155;
   color: #fff;
-  border-radius: 8px;
 }
 
 .tab-content {
@@ -76,47 +74,50 @@ body {
 }
 
 input[type="file"] {
-  margin: 0.5rem 0 1rem;
-  display: block;
+  margin-top: 1rem;
+  font-size: 1rem;
 }
 
 button {
-  padding: 0.6rem 1.5rem;
-  font-size: 1rem;
-  background: #333;
+  padding: 0.8rem 1.5rem;
+  background: #2563eb;
   color: white;
   border: none;
   border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
   cursor: pointer;
-  transition: background 0.3s;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background: #555;
+  background-color: #1d4ed8;
 }
 
 .preview img {
   max-width: 100%;
-  max-height: 200px;
+  max-height: 240px;
   margin-top: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.2);
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 .result {
   margin-top: 1rem;
   font-weight: bold;
-  color: #222;
+  font-size: 1.1rem;
+  color: #111827;
 }
 
 .site-footer {
   margin-top: auto;
-  background: #fafafa;
+  background: #f1f5f9;
   padding: 2rem 1rem;
   text-align: center;
-  font-size: 0.9rem;
-  color: #555;
-  border-top: 1px solid #ddd;
+  font-size: 0.95rem;
+  color: #475569;
+  border-top: 1px solid #cbd5e1;
 }
 
 .footer-section {
@@ -124,8 +125,9 @@ button:hover {
 }
 
 .footer-section h4 {
-  margin: 0;
+  margin-bottom: 0.3rem;
   font-weight: bold;
+  font-size: 1.1rem;
 }
 
 .hidden {
