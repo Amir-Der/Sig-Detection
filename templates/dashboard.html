@@ -4,31 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>سامانه تشخیص امضای جعلی</title>
-  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="stylesheet" href="/static/css/style.css" />
 </head>
 <body>
-  <div class="site-header">
+  <header class="site-header">
     <h1>سامانه تشخیص امضای جعلی</h1>
-  </div>
+  </header>
 
-  <div class="container">
+  <main class="container">
     <div class="tab-buttons">
       <button class="tab active" onclick="showTab(event, 'upload-test')">آپلود برای تست</button>
       <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
     </div>
 
-    <!-- تب تست -->
-    <div class="tab-content" id="upload-test">
+    <section class="tab-content" id="upload-test">
       <form id="test-form" enctype="multipart/form-data">
         <input type="file" name="file" accept="image/*" required />
         <button type="submit">بررسی امضا</button>
         <div class="preview" id="preview-test"></div>
         <div class="result" id="result-test"></div>
       </form>
-    </div>
+    </section>
 
-    <!-- تب آموزش -->
-    <div class="tab-content hidden" id="upload-train">
+    <section class="tab-content hidden" id="upload-train">
       <form id="train-form" enctype="multipart/form-data">
         <label>آپلود ۱۰ امضای واقعی:</label>
         <input type="file" name="real_files" accept="image/*" multiple required />
@@ -37,19 +35,19 @@
         <button type="submit">آموزش مدل</button>
         <div class="result" id="result-train"></div>
       </form>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <div class="site-footer">
+  <footer class="site-footer">
     <div class="footer-section">
       <h4>درباره ما</h4>
-      <p>طراحی مدل یادگیری ماشین با استفاده از زبان برنامه‌نویسی پایتون و الگوریتم‌های HOG و SVM</p>
+      <p>تشخیص امضای جعلی با مدل یادگیری ماشین با الگوریتم HOG + SVM</p>
     </div>
     <div class="footer-section">
       <h4>توسعه‌دهندگان</h4>
-      <p>امیرمحمد درخشان <br> محمد بهرامگیری</p>
+      <p>امیرمحمد درخشان و محمد بهرامگیری</p>
     </div>
-  </div>
+  </footer>
 
   <script>
     function showTab(e, id) {
@@ -70,7 +68,7 @@
         const res = await fetch("/", { method: "POST", body: formData });
         const data = await res.json();
         document.getElementById("result-test").innerText = data.result || "نتیجه‌ای دریافت نشد";
-      } catch (err) {
+      } catch {
         document.getElementById("result-test").innerText = "خطا در ارتباط با سرور";
       }
     });
@@ -80,13 +78,10 @@
       const formData = new FormData(e.target);
 
       try {
-        const res = await fetch("/train", {
-          method: "POST",
-          body: formData
-        });
+        const res = await fetch("/train", { method: "POST", body: formData });
         const data = await res.json();
         document.getElementById("result-train").innerText = data.result || "خطا در آموزش";
-      } catch (err) {
+      } catch {
         document.getElementById("result-train").innerText = "خطا در ارسال اطلاعات";
       }
     });
