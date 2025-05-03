@@ -1,107 +1,100 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>سامانه تشخیص امضای جعلی</title>
-  <link rel="stylesheet" href="/static/style.css" />
-</head>
-<body>
-  <header class="site-header">
-    <h1>سامانه تشخیص امضای جعلی</h1>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>سامانه تشخیص امضای جعلی</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>سامانه تشخیص امضای جعلی</h1>
+    </header>
 
-  <main class="container">
-    <div class="tab-buttons">
-      <button class="tab active" onclick="showTab(event, 'upload-test')">آپلود برای تست</button>
-      <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
-    </div>
+    <main class="container">
+      <div class="tab-buttons">
+        <button class="tab active" onclick="showTab(event, 'upload-test')">آپلود برای تست</button>
+        <button class="tab" onclick="showTab(event, 'upload-train')">آپلود برای آموزش</button>
+      </div>
 
-    <section class="tab-content" id="upload-test">
-      <form id="test-form" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required />
-        <button type="submit">بررسی امضا</button>
-        <div class="preview" id="preview-test"></div>
-        <div class="result" id="result-test"></div>
-      </form>
-    </section>
+      <section class="tab-content" id="upload-test">
+        <form id="test-form" enctype="multipart/form-data">
+          <input type="file" name="file" accept="image/*" required />
+          <button type="submit">بررسی امضا</button>
+          <div class="preview" id="preview-test"></div>
+          <div class="result" id="result-test"></div>
+        </form>
+      </section>
 
-    <section class="tab-content hidden" id="upload-train">
-      <form id="train-form" enctype="multipart/form-data">
-        <label>آپلود ۱۰ امضای واقعی:</label>
-        <input type="file" name="real_files" accept="image/*" multiple required />
-        <label>آپلود ۱۰ امضای جعلی:</label>
-        <input type="file" name="fake_files" accept="image/*" multiple required />
-        <button type="submit">آموزش مدل</button>
-        <div class="result" id="result-train"></div>
-      </form>
-    </section>
-  </main>
+      <section class="tab-content hidden" id="upload-train">
+        <form id="train-form" enctype="multipart/form-data">
+          <label>آپلود ۱۰ امضای واقعی:</label>
+          <input type="file" name="real_files" accept="image/*" multiple required />
+          <label>آپلود ۱۰ امضای جعلی:</label>
+          <input type="file" name="fake_files" accept="image/*" multiple required />
+          <button type="submit">آموزش مدل</button>
+          <div class="result" id="result-train"></div>
+        </form>
+      </section>
+    </main>
 
-  <footer class="site-footer">
-    <div class="footer-section">
-      <h4>درباره ما</h4>
-      <p>تشخیص امضای جعلی با مدل یادگیری ماشین با الگوریتم HOG + SVM</p>
-    </div>
-    <div class="footer-section">
-      <h4>توسعه‌دهندگان</h4>
+    <footer class="site-footer">
+      <p>طراحی شده با الهام از برترین سایت‌های دنیا</p>
       <p>امیرمحمد درخشان و محمد بهرامگیری</p>
-    </div>
-  </footer>
+    </footer>
 
-  <script>
-    function showTab(e, id) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      document.getElementById(id).classList.remove('hidden');
-      document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
-      e.target.classList.add('active');
-    }
-
-    // فرم تست: پاک‌سازی نتیجه قبلی قبل از ارسال مجدد
-    document.getElementById('test-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      // پاک کردن نتیجه قبلی
-      document.getElementById('result-test').innerText = '';
-
-      const input = document.querySelector('#test-form input[name="file"]');
-      if (!input.files.length) return;
-      const formData = new FormData();
-      formData.append("file", input.files[0]);
-
-      try {
-        const res = await fetch("/", { method: "POST", body: formData });
-        const data = await res.json();
-        document.getElementById("result-test").innerText = data.result || "نتیجه‌ای دریافت نشد";
-      } catch {
-        document.getElementById("result-test").innerText = "خطا در ارتباط با سرور";
+    <script>
+      function showTab(e, id) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+        document.querySelectorAll('.tab').forEach(btn => btn.classList.remove('active'));
+        e.target.classList.add('active');
       }
-    });
 
-    // فرم آموزش مدل
-    document.getElementById('train-form').addEventListener('submit', async e => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
+      document.getElementById('test-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        document.getElementById("result-test").innerText = "";
+        const input = document.querySelector('#test-form input[name="file"]');
+        if (!input.files.length) return;
+        const formData = new FormData();
+        formData.append("file", input.files[0]);
 
-      try {
-        const res = await fetch("/train", { method: "POST", body: formData });
-        const data = await res.json();
-        document.getElementById("result-train").innerText = data.result || "خطا در آموزش";
-      } catch {
-        document.getElementById("result-train").innerText = "خطا در ارسال اطلاعات";
-      }
-    });
+        try {
+          const res = await fetch("/", { method: "POST", body: formData });
+          const data = await res.json();
+          document.getElementById("result-test").innerText = data.result || "نتیجه‌ای دریافت نشد";
+        } catch {
+          document.getElementById("result-test").innerText = "خطا در ارتباط با سرور";
+        }
+      });
 
-    // پیش‌نمایش تصویر در تب تست
-    document.querySelector('#test-form input[name="file"]').addEventListener('change', e => {
-      const file = e.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = ev => {
-          document.getElementById('preview-test').innerHTML = `<img src="${ev.target.result}" alt="پیش‌نمایش">`;
-        };
-        reader.readAsDataURL(file);
-      }
-    });
-  </script>
-</body>
+      document.getElementById('train-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        document.getElementById("result-train").innerText = "";
+        const formData = new FormData(e.target);
+
+        try {
+          const res = await fetch("/train", { method: "POST", body: formData });
+          const data = await res.json();
+          document.getElementById("result-train").innerText = data.result || "خطا در آموزش";
+        } catch {
+          document.getElementById("result-train").innerText = "خطا در ارسال اطلاعات";
+        }
+      });
+
+      document.querySelector('#test-form input[name="file"]').addEventListener('change', e => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            document.getElementById('preview-test').innerHTML = `<img src="${ev.target.result}" alt="پیش‌نمایش">`;
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    </script>
+  </body>
 </html>
